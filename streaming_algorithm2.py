@@ -126,11 +126,14 @@ def percentile(values: list[float], p: float) -> float:
 def run_experiment():
 
     bloom = BloomFilter(
+        # bit_size=2000000,
         bit_size=1000000,
         hash_count=5
     )
 
     cms = CountMinSketch(
+        # width=4000,
+        # depth=10
         width=2000,
         depth=5
     )
@@ -145,11 +148,14 @@ def run_experiment():
     for customer, product in stream_online_retail():
 
         key = f"{customer}->{product}"
-
+        st = time.perf_counter()
         bloom.add(key)
-
+        bloom_time = time.perf_counter() - st
+        
+        st1 = time.perf_counter()
         cms.add(product)
-
+        cms_time = time.perf_counter() - st1
+        
         exact_edges.add(key)
 
         exact_frequency[product] += 1
@@ -159,6 +165,8 @@ def run_experiment():
     elapsed = time.perf_counter() - start
 
     print("레코드 수:", total_records)
+    print("Bloom Filter 처리 시간:", bloom_time)
+    print("Count-Min Sketch 처리 시간:", cms_time)
     print("처리 시간:", elapsed)
 
     # Bloom Filter 정확도 평가
